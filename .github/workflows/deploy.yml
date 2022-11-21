@@ -1,0 +1,54 @@
+name: Deta Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  NODE_ENV: production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deta Deploy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+          cache: 'yarn'
+
+      - name: Install dependensis
+        run: yarn install --production=false
+
+      - name: Build code
+        run: yarn build
+
+      - name: Clean dependencies
+        run: rm -rf package.json yarn.lock && yarn add serve-handler
+
+      - name: Create index.js
+        run: |
+          cat > index.js <<EOF
+          const handler = require('serve-handler');
+          module.exports = (req, res) => {
+            return handler(req, res, {public: 'build'});
+          };
+          EOF
+
+      - name: Publish
+        uses: BogDAAAMN/deta-deploy-action@v1.0.1
+        with:
+          deta-access-token: ${{ secrets.DETA_ACCESS_TOKEN }}
+          deta-name: 'cra-deta-example'
+          deta-project: 'default'
+          deta-project-dir: '.'
+
+      - name: Update Deta environments
+        run: |
+          export DETA_ACCESS_TOKEN=${{ secrets.DETA_ACCESS_TOKEN }}
+          ~/.deta/bin/deta update -e .env
