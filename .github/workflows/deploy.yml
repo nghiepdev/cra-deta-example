@@ -7,6 +7,7 @@ on:
 
 env:
   NODE_ENV: production
+  BINARY_CONTENT_TYPES: image/*,font/*
 
 jobs:
   deploy:
@@ -15,6 +16,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Setup environments
+        run: env | grep -E "NODE_ENV|BINARY_CONTENT_TYPES|^APP_" >> .env
 
       - name: Setup Nodejs
         uses: actions/setup-node@v3
