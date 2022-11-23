@@ -6,7 +6,6 @@ on:
       - main
 
 env:
-  NODE_ENV: production
   BINARY_CONTENT_TYPES: image/*,font/*
 
 jobs:
@@ -18,7 +17,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup environments
-        run: env | grep -E "NODE_ENV|BINARY_CONTENT_TYPES|^APP_" >> .env
+        run: env | grep "BINARY_CONTENT_TYPES" >> .env.deta
 
       - name: Setup Nodejs
         uses: actions/setup-node@v3
@@ -55,4 +54,4 @@ jobs:
       - name: Update Deta environments
         run: |
           export DETA_ACCESS_TOKEN=${{ secrets.DETA_ACCESS_TOKEN }}
-          ~/.deta/bin/deta update -e .env
+          ~/.deta/bin/deta update -e .env.deta
